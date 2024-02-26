@@ -1,0 +1,36 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText>@DateTime.Now.ToString("dd/MM/yyyy")</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
+        <MudText>@accName</MudText>
+        <MudSpacer />
+        <MudText>@DateTime.Now.ToString("HH:mm:ss")</MudText>
+    </MudAppBar>
+    <MudDrawer Open="true" Elevation="2">
+        <MudDrawerHeader Class="px-0 py-0">
+            <MudPaper Width="300px" Class="py-0" Elevation="0">
+                <MudNavMenu>
+                    <MudText Typo="Typo.h6" Class="px-4 py-3 d-flex" Style="justify-content:center; align-content:center; background-color:lightskyblue">AquaMon</MudText>
+                    <MudDivider />
+                    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+                    <MudNavLink Href="/sensors" Match="NavLinkMatch.All">Sensors</MudNavLink>
+                    <MudNavLink Href="/account" Match="NavLinkMatch.All">Account</MudNavLink>
+                </MudNavMenu>
+            </MudPaper>
+        </MudDrawerHeader>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    string accName = "Yx";
+}
