@@ -7,11 +7,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 
-//Db Connection String
-builder.Services.AddDbContextFactory<DatabaseContext>(options =>
-    options.UseSqlServer(builder.Configuration
-    .GetConnectionString("Debug")));
-
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
