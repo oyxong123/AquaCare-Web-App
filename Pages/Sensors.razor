@@ -1,5 +1,22 @@
-﻿<h3>Sensors</h3>
+﻿@page "/sensors"
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%"></MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%"></MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
+    List<Sensors> sensorList = new();
+
+    public async Task OnInitializedAsync()
+    {
+        sensorList = 
+    }
 
 }

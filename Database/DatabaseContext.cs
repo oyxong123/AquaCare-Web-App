@@ -7,7 +7,7 @@ namespace AquaCare_Web_App.Database
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string debugConnectionString = "Server=DESKTOP-BU9N8KA\\SQLEXPRESS;Database=AquaCareWebAppDb_Debug;Trusted_Connection=True;";
+            string debugConnectionString = "Server=DESKTOP-BU9N8KA\\SQLEXPRESS;Database=AquaCareWebApp_Database_Debug;Trusted_Connection=True;Encrypt=False;";
             optionsBuilder.UseSqlServer(debugConnectionString);
         }
 
