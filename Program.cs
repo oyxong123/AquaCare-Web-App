@@ -1,11 +1,15 @@
 using AquaCare_Web_App.Database;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
+using AquaCare_Web_App.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+
+builder.Services.AddDbContextFactory<DatabaseContext>();
+builder.Services.AddScoped<ISensorService, SensorService>();
 
 var app = builder.Build();
 
