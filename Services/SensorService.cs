@@ -2,6 +2,7 @@
 using AquaCare_Web_App.Models;
 using AquaCare_Web_App.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AquaCare_Web_App.Services
 {
@@ -15,7 +16,7 @@ namespace AquaCare_Web_App.Services
         private readonly string _textHasExisted = " has existed.";
         private readonly string _textNotMatch = " does not match with provided ";
 
-        public async Task<List<SensorDto>> GetAllSensorRecords()
+        public async Task<List<SensorDto>> GetAllSystemRecords()
         {
             try
             {
@@ -26,9 +27,56 @@ namespace AquaCare_Web_App.Services
                         throw new Exception("Sensor" + _textNotInitialized);
                     }
 
-                    List<Sensor> sensorModelList = sensorModelList = await _context.Sensor.ToListAsync();
-                    List<SensorDto> sensorDtoList = new();
-                    foreach (var sensor in sensorModelList)
+                    List<Sensor> sensorModelList = await _context.Sensor.ToListAsync();
+
+                    List<SensorDto> sensorDtoList = [];
+                    foreach (Sensor sensor in sensorModelList)
+                    {
+                        SensorDto sensorDto = new()
+                        {
+                            Model = sensor.Model,
+                            Timestamp = sensor.Timestamp,
+                            Ph = sensor.Ph,
+                            Salinity = sensor.Salinity,
+                            SunlightIntensity = sensor.SunlightIntensity,
+                            Temperature = sensor.Temperature,
+                            Turbidity = sensor.Turbidity
+                        };
+                        sensorDtoList.Add(sensorDto);
+                    }
+
+                    return sensorDtoList;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<SensorDto>> GetLatestSystemRecords()
+        {
+            try
+            {
+                using (var _context = await _contextFactory.CreateDbContextAsync())
+                {
+                    if (_context.Sensor == null)
+                    {
+                        throw new Exception("Sensor" + _textNotInitialized);
+                    }
+
+                    var temp = await _context.Sensor.Select(u => u.Model).ToListAsync();
+                    var modelList = temp.Distinct().ToList();
+
+                    List<Sensor> sensorModelList = [];
+                    foreach (string model in modelList)
+                    {
+                        Sensor sensorRecord = await _context.Sensor.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).FirstAsync();
+                        sensorModelList.Add(sensorRecord);
+                    }
+
+                    List<SensorDto> sensorDtoList = [];
+                    foreach (Sensor sensor in sensorModelList)
                     {
                         SensorDto sensorDto = new()
                         {
@@ -44,6 +92,43 @@ namespace AquaCare_Web_App.Services
                     }
 
                     return sensorDtoList; 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<SensorDto>> GetSensorRecords(string model)
+        {
+            try
+            {
+                using (var _context = await _contextFactory.CreateDbContextAsync())
+                {
+                    if (_context.Sensor == null)
+                    {
+                        throw new Exception("Sensor" + _textNotInitialized);
+                    }
+
+                    List<Sensor> sensorModelList = sensorModelList = await _context.Sensor.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).ToListAsync();
+                    List<SensorDto> sensorDtoList = [];
+                    foreach (var sensor in sensorModelList)
+                    {
+                        SensorDto sensorDto = new()
+                        {
+                            Model = sensor.Model,
+                            Timestamp = sensor.Timestamp,
+                            Ph = sensor.Ph,
+                            Salinity = sensor.Salinity,
+                            SunlightIntensity = sensor.SunlightIntensity,
+                            Temperature = sensor.Temperature,
+                            Turbidity = sensor.Turbidity
+                        };
+                        sensorDtoList.Add(sensorDto);
+                    }
+
+                    return sensorDtoList;
                 }
             }
             catch (Exception ex)

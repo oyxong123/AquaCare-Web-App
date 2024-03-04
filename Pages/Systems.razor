@@ -1,0 +1,92 @@
+﻿@page "/systems"
+@using Models.Dtos
+@using Services
+@inject ISensorService ISensorService
+
+@if (page == "systems")
+{
+    <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+        <MudGrid>
+            @foreach (var system in systemList)
+            {
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 100%" onclick="@(() => OpenSensorData(system.Model))">
+                        <MudStack Spacing="3">
+                            <MudText Typo="Typo.h6">Model: @system.Model</MudText>
+                            <MudGrid>
+                                <MudItem xs="6">
+                                    <MudStack>
+                                        <MudText Typo="Typo.caption">Timestamp: @system.Timestamp</MudText>
+                                        <MudText Typo="Typo.caption">pH: @system.Ph</MudText>
+                                        <MudText Typo="Typo.caption">Temperature: @system.Temperature</MudText>
+                                    </MudStack>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudStack>
+                                        <MudText Typo="Typo.caption">Sunlight Intensity: @system.SunlightIntensity</MudText>
+                                        <MudText Typo="Typo.caption">Turbidity: @system.Turbidity</MudText>
+                                        <MudText Typo="Typo.caption">Salinity: @system.Salinity</MudText>
+                                    </MudStack>
+                                </MudItem>
+                            </MudGrid>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudContainer>
+}
+else if(page == "sensor")
+{
+    <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudText Typo="Typo.h6">@sensorModel</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTable Items="@sensorRecords" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@tableLoading" LoadingProgressColor="Color.Info">
+                    <HeaderContent>
+                        <MudTh>Date</MudTh>
+                        <MudTh>Time</MudTh>
+                        <MudTh>pH</MudTh>
+                        <MudTh>Temperature</MudTh>
+                        <MudTh>Sunlight Intensity</MudTh>
+                        <MudTh>Turbidity</MudTh>
+                        <MudTh>Salinity</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Date">@context.Timestamp.ToString("dd/MM/yyyy")</MudTd>
+                        <MudTd DataLabel="Time">@context.Timestamp.ToString("HH:mm:ss")</MudTd>
+                        <MudTd DataLabel="pH">@context.Ph</MudTd>
+                        <MudTd DataLabel="Temperature">@context.Temperature</MudTd>
+                        <MudTd DataLabel="Sunlight Intensity">@context.SunlightIntensity</MudTd>
+                        <MudTd DataLabel="Turbidity">@context.Turbidity</MudTd>
+                        <MudTd DataLabel="Salinity">@context.Salinity</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudItem>
+            
+        </MudGrid>
+    </MudContainer>
+}
+
+@code {
+    List<SensorDto> systemList = new();
+    List<SensorDto> sensorRecords = new();
+    string sensorModel = "";
+    string page = "systems";
+    bool tableLoading = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        systemList = await ISensorService.GetLatestSystemRecords();
+    }
+
+    private async void OpenSensorData(string model)
+    {
+        page = "sensor";
+        sensorRecords = await ISensorService.GetSensorRecords(model);
+        sensorModel = sensorRecords.First().Model;
+        StateHasChanged();
+    }
+}

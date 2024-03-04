@@ -1,4 +1,7 @@
 ﻿@page "/dashboard"
+@using Models.Dtos
+@using Services
+@inject ISensorService ISensorService
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
@@ -37,5 +40,26 @@
 </MudContainer>
 
 @code {
+    List<SensorDto> systemRecordList = [];
+    List<SensorDto> latestSystemRecordList = [];
+    List<string> modelList = [];
+    decimal optimalPh = 7;
+    decimal optimalTemp = 1;
+    decimal optimalSun = 1;
+    decimal optimalTurbidity = 1;
+    decimal optimalSalinity = 1;
 
+
+    protected async override Task OnInitializedAsync()
+    {
+        systemRecordList = await ISensorService.GetAllSystemRecords();
+        modelList = systemRecordList.Select(u => u.Model).Distinct().ToList();
+        foreach (string model in modelList)
+        {
+            SensorDto latestRecord = systemRecordList.Where(u => u.Model == model).MaxBy(u => u.Timestamp) 
+                                        ?? throw new Exception("No model found.");
+            latestSystemRecordList.Append(latestRecord);
+        }
+
+    }
 }
