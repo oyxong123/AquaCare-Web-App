@@ -5,36 +5,18 @@
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%"></MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6">
             <MudGrid>
                 <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 500px;"></MudPaper>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 500px;"></MudPaper>
                 </MudItem>
             </MudGrid>
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
         </MudItem>
     </MudGrid>
 </MudContainer>
@@ -44,11 +26,10 @@
     List<SensorDto> latestSystemRecordList = [];
     List<string> modelList = [];
     decimal optimalPh = 7;
-    decimal optimalTemp = 1;
-    decimal optimalSun = 1;
-    decimal optimalTurbidity = 1;
-    decimal optimalSalinity = 1;
-
+    decimal optimalTemp = 22.5m;
+    decimal optimalSun = 400;
+    decimal optimalTurb = 2.6m;
+    decimal optimalSal = 35;
 
     protected async override Task OnInitializedAsync()
     {
@@ -61,5 +42,58 @@
             latestSystemRecordList.Append(latestRecord);
         }
 
+        // Find detected abnormalities from all systems.
+        foreach (SensorDto latestRecord in latestSystemRecordList)
+        {
+            decimal ph = latestRecord.Ph;
+            decimal temp = latestRecord.Temperature;
+            decimal sun = latestRecord.SunlightIntensity;
+            decimal turb = latestRecord.Turbidity;
+            decimal sal = latestRecord.Salinity;
+            decimal deviationPh, deviationTemp, deviationSun, deviationTurb, deviationSal;
+
+            if (ph > optimalPh)
+            {
+                deviationPh = ph - optimalPh;
+            }
+            else
+            {
+                deviationPh = optimalPh - ph;
+            }
+            if (temp > optimalTemp)
+            {
+                deviationTemp = temp - optimalTemp;
+            }
+            else
+            {
+                deviationTemp = optimalTemp - temp;
+            }
+            if (sun > optimalSun)
+            {
+                deviationSun = sun - optimalSun;
+            }
+            else
+            {
+                deviationSun = optimalSun - sun;
+            }
+            if (turb > optimalTurb)
+            {
+                deviationTurb = turb - optimalTurb;
+            }
+            else
+            {
+                deviationTurb = optimalTurb - turb;
+            }
+            if (sal > optimalSal)
+            {
+                deviationSal = sal - optimalSal;
+            }
+            else
+            {
+                deviationSal = optimalSal - sal;
+            }
+
+
+        }
     }
 }
