@@ -16,7 +16,7 @@ namespace AquaCare_Web_App.Services
         private readonly string _textHasExisted = " has existed.";
         private readonly string _textNotMatch = " does not match with provided ";
 
-        public async Task<List<SensorDto>> GetAllSystemRecordsFromLastSevenDays()
+        public async Task<List<SensorDto>> GetAllLatestSystemsRecordFromLastSevenDays()
         {
             try
             {
@@ -28,7 +28,21 @@ namespace AquaCare_Web_App.Services
                     }
 
                     DateTime timestampLimit = DateTime.Now.AddDays(-7);
-                    List<Sensor> sensorModelList = await _context.Sensor.Where(u => u.Timestamp > timestampLimit).ToListAsync();
+                    List<Sensor> sensorModelList = await _context.Sensor
+                       .Where(u => u.Timestamp > timestampLimit)
+                       .ToListAsync();
+
+                    List<Sensor> filteredList = [];
+                    foreach (var model in sensorModelList.GroupBy(u => u.Model))
+                    {
+                        var filteredModel = model
+                            .Where(u => u.Timestamp > timestampLimit)
+                            .GroupBy(u => u.Timestamp.Date)
+                            .Select(u => u.OrderByDescending(u => u.Timestamp).First());
+
+                        filteredList.AddRange(filteredModel);
+                    }
+                    sensorModelList = filteredList;
 
                     List<SensorDto> sensorDtoList = [];
                     foreach (Sensor sensor in sensorModelList)
