@@ -5,7 +5,8 @@ namespace AquaCare_Web_App.Models.Dtos
 {
     public class SensorDto
     {
-        public required string Model { get; set; }
+        public int Id { get; set; }
+        public string Model { get; set; } = "";
         public DateTime Timestamp { get; set; }
         [Column(TypeName = "decimal(6,4)")]
         public decimal Ph { get; set; }
@@ -29,5 +30,6 @@ namespace AquaCare_Web_App.Models.Dtos
         public decimal SalinityDeviationIndex { get; set; }
         [Column(TypeName = "decimal(8,4)")]
         public decimal TurbidityDeviationIndex { get; set; }
+        public decimal Priority { get; set; }
     }
 }

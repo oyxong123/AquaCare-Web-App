@@ -3,18 +3,62 @@
 @using Services
 @inject ISensorService ISensorService
 
-<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+<MudContainer Class="mt-8 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
         <MudItem xs="12" sm="6">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%"></MudPaper>
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%">
+                <MudStack Spacing="3">
+                    <MudText Typo="Typo.h5" Class="d-flex" Style="justify-content: center; font-weight:bold;">Priority</MudText>
+                    <MudDivider />
+                    <MudStack>
+                        @foreach (SensorDto model in modelPriorityList)
+                        {
+                            if (model.Priority > 1)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#ace340">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority > 2)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#e8cf43">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority > 3)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#e88d43">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority > 4)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#ed4734">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority > 5)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#f21616">
+
+                                </MudPaper>
+                            }
+                        }
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6">
             <MudGrid>
                 <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 500px;"></MudPaper>
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
+
+                    </MudPaper>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 500px;"></MudPaper>
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
+
+                    </MudPaper>
                 </MudItem>
             </MudGrid>
         </MudItem>
@@ -22,8 +66,9 @@
 </MudContainer>
 
 @code {
-    List<SensorDto> systemRecordList = [];
-    List<SensorDto> latestSystemRecordList = [];
+    List<SensorDto> modelRecordList = [];
+    List<SensorDto> latestModelRecordList = [];
+    List<SensorDto> modelPriorityList = [];
     List<string> modelList = [];
     decimal optimalPh = 7;
     decimal optimalTemp = 22.5m;
@@ -33,17 +78,17 @@
 
     protected async override Task OnInitializedAsync()
     {
-        systemRecordList = await ISensorService.GetAllSystemRecords();
-        modelList = systemRecordList.Select(u => u.Model).Distinct().ToList();
+        modelRecordList = await ISensorService.GetAllSystemRecords();
+        modelList = modelRecordList.Select(u => u.Model).Distinct().ToList();
         foreach (string model in modelList)
         {
-            SensorDto latestRecord = systemRecordList.Where(u => u.Model == model).MaxBy(u => u.Timestamp) 
+            SensorDto latestRecord = modelRecordList.Where(u => u.Model == model).MaxBy(u => u.Timestamp) 
                                         ?? throw new Exception("No model found.");
-            latestSystemRecordList.Append(latestRecord);
+            latestModelRecordList.Append(latestRecord);
         }
 
         // Find detected abnormalities from all systems.
-        foreach (SensorDto latestRecord in latestSystemRecordList)
+        foreach (SensorDto latestRecord in latestModelRecordList)
         {
             decimal ph = latestRecord.Ph;
             decimal temp = latestRecord.Temperature;
@@ -62,38 +107,46 @@
             }
             if (temp > optimalTemp)
             {
-                deviationTemp = temp - optimalTemp;
+                deviationTemp = (temp - optimalTemp) / 2;
             }
             else
             {
-                deviationTemp = optimalTemp - temp;
+                deviationTemp = (optimalTemp - temp) / 2;
             }
             if (sun > optimalSun)
             {
-                deviationSun = sun - optimalSun;
+                deviationSun = (sun - optimalSun) / 10;
             }
             else
             {
-                deviationSun = optimalSun - sun;
+                deviationSun = (optimalSun - sun) / 10;
             }
             if (turb > optimalTurb)
             {
-                deviationTurb = turb - optimalTurb;
+                deviationTurb = (turb - optimalTurb) / 0.3m;
             }
             else
             {
-                deviationTurb = optimalTurb - turb;
+                deviationTurb = (optimalTurb - turb) / 0.3m;
             }
             if (sal > optimalSal)
             {
-                deviationSal = sal - optimalSal;
+                deviationSal = (sal - optimalSal) / 2;
             }
             else
             {
-                deviationSal = optimalSal - sal;
+                deviationSal = (optimalSal - sal) / 2;
             }
 
+            List<decimal> deviationList = [deviationPh, deviationTemp, deviationSun, deviationTurb, deviationSal];
+            latestRecord.Priority = deviationList.Max();
+            if (latestRecord.Priority > 1)
+            {
+                modelPriorityList.Append(latestRecord);
+            }
 
         }
+
+        modelPriorityList = modelPriorityList.OrderByDescending(u => u.Priority).ToList();
     }
 }
