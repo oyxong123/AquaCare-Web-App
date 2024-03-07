@@ -10,36 +10,66 @@
                 <MudStack Spacing="3">
                     <MudText Typo="Typo.h5" Class="d-flex" Style="justify-content: center; font-weight:bold;">Priority</MudText>
                     <MudDivider />
-                    <MudStack>
+                    <MudStack Spacing="1">
                         @foreach (SensorDto model in modelPriorityList)
                         {
-                            if (model.Priority > 1)
+                            if (model.Priority > 5)
                             {
-                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#ace340">
-
-                                </MudPaper>
-                            }
-                            else if (model.Priority > 2)
-                            {
-                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#e8cf43">
-
-                                </MudPaper>
-                            }
-                            else if (model.Priority > 3)
-                            {
-                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#e88d43">
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#f21616">
 
                                 </MudPaper>
                             }
                             else if (model.Priority > 4)
                             {
-                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#ed4734">
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ed4734">
 
                                 </MudPaper>
                             }
-                            else if (model.Priority > 5)
+                            else if (model.Priority > 3)
                             {
-                                <MudPaper Elevation="1" Class="pa-4" Style="height: 80px; background-color:#f21616">
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e88d43">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority > 2)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e8cf43">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority > 1)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ace340">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority < -5)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#f21616">
+                                    
+                                </MudPaper>
+                            }
+                            else if (model.Priority < -4)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ed4734">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority < -3)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e88d43">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority < -2)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e8cf43">
+
+                                </MudPaper>
+                            }
+                            else if (model.Priority < -1)
+                            {
+                                <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ace340">
 
                                 </MudPaper>
                             }
@@ -52,7 +82,15 @@
             <MudGrid>
                 <MudItem xs="12">
                     <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
+                        <MudCarousel Class="mud-width-full" Style="height:150px;" AutoCycle="true" TData="object">
+                            @foreach (SensorDto modelRecordAverage in modelRecordAverageList){
+                                <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
+                                    <div class="d-flex" style="height:100%">
 
+                                    </div>
+                                </MudCarouselItem>
+                            }
+                        </MudCarousel>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12">
@@ -66,10 +104,11 @@
 </MudContainer>
 
 @code {
-    List<SensorDto> modelRecordList = [];
-    List<SensorDto> latestModelRecordList = [];
-    List<SensorDto> modelPriorityList = [];
-    List<string> modelList = [];
+    List<SensorDto> modelAllRecordList = [];  // List of all records from each model.
+    List<SensorDto> latestModelRecordList = [];  // List of latest record from each model.
+    List<SensorDto> modelPriorityList = [];  // List of records that requires attention.
+    List<SensorDto> modelRecordAverageList = [];  // List of average record from each model.
+    List<string> modelList = [];  // List of all model names.
     decimal optimalPh = 7;
     decimal optimalTemp = 22.5m;
     decimal optimalSun = 400;
@@ -78,13 +117,24 @@
 
     protected async override Task OnInitializedAsync()
     {
-        modelRecordList = await ISensorService.GetAllSystemRecords();
-        modelList = modelRecordList.Select(u => u.Model).Distinct().ToList();
+        modelAllRecordList = await ISensorService.GetAllSystemRecordsFromLastSevenDays();
+        modelList = modelAllRecordList.Select(u => u.Model).Distinct().ToList();
         foreach (string model in modelList)
         {
-            SensorDto latestRecord = modelRecordList.Where(u => u.Model == model).MaxBy(u => u.Timestamp) 
+            SensorDto latestRecord = modelAllRecordList.Where(u => u.Model == model).MaxBy(u => u.Timestamp) 
                                         ?? throw new Exception("No model found.");
-            latestModelRecordList.Append(latestRecord);
+            latestModelRecordList.Add(latestRecord);
+
+            // Calculate average properties from the past 7 days for all models.
+            List<SensorDto> modelRecordList = modelAllRecordList.Where(u => u.Model == model).ToList();  // List of all records for the specific model.
+            SensorDto modelRecordAverage = new();
+            modelRecordAverage.Model = model;
+            modelRecordAverage.Ph = modelRecordList.Average(u => u.Ph);
+            modelRecordAverage.Temperature = modelRecordList.Average(u => u.Temperature);
+            modelRecordAverage.SunlightIntensity = modelRecordList.Average(u => u.SunlightIntensity);
+            modelRecordAverage.Turbidity = modelRecordList.Average(u => u.Turbidity);
+            modelRecordAverage.Salinity = modelRecordList.Average(u => u.Salinity);
+            modelRecordAverageList.Add(modelRecordAverage);
         }
 
         // Find detected abnormalities from all systems.
@@ -97,56 +147,35 @@
             decimal sal = latestRecord.Salinity;
             decimal deviationPh, deviationTemp, deviationSun, deviationTurb, deviationSal;
 
-            if (ph > optimalPh)
-            {
-                deviationPh = ph - optimalPh;
-            }
-            else
-            {
-                deviationPh = optimalPh - ph;
-            }
-            if (temp > optimalTemp)
-            {
-                deviationTemp = (temp - optimalTemp) / 2;
-            }
-            else
-            {
-                deviationTemp = (optimalTemp - temp) / 2;
-            }
-            if (sun > optimalSun)
-            {
-                deviationSun = (sun - optimalSun) / 10;
-            }
-            else
-            {
-                deviationSun = (optimalSun - sun) / 10;
-            }
-            if (turb > optimalTurb)
-            {
-                deviationTurb = (turb - optimalTurb) / 0.3m;
-            }
-            else
-            {
-                deviationTurb = (optimalTurb - turb) / 0.3m;
-            }
-            if (sal > optimalSal)
-            {
-                deviationSal = (sal - optimalSal) / 2;
-            }
-            else
-            {
-                deviationSal = (optimalSal - sal) / 2;
-            }
+            // Positive value indicate too high, negative value indicate too low.
+            deviationPh = ph - optimalPh;
+            deviationTemp = (temp - optimalTemp) / 2;
+            deviationSun = (sun - optimalSun) / 10;
+            deviationTurb = (turb - optimalTurb) / 0.3m;
+            deviationSal = (sal - optimalSal) / 2;
 
+            // Find the highest emergency deviation, either positive or negative
             List<decimal> deviationList = [deviationPh, deviationTemp, deviationSun, deviationTurb, deviationSal];
-            latestRecord.Priority = deviationList.Max();
-            if (latestRecord.Priority > 1)
-            {
-                modelPriorityList.Append(latestRecord);
-            }
+            decimal deviationMax = deviationList.Max();
+            decimal deviationMin = deviationList.Min();
+            latestRecord.Priority = deviationMax > Math.Abs(deviationMin) 
+                ? deviationMax 
+                : deviationMin;
+            latestRecord.PriorityAbsolute = deviationMax > Math.Abs(deviationMin)
+            ? deviationMax
+            : Math.Abs(deviationMin);
 
+            if (latestRecord.Priority > 1 || latestRecord.Priority < -1)
+            {
+                latestRecord.PhDeviationIndex = deviationPh;
+                latestRecord.TemperatureDeviationIndex = deviationTemp;
+                latestRecord.SunlightIntensityDeviationIndex = deviationSun;
+                latestRecord.TurbidityDeviationIndex = deviationTurb;
+                latestRecord.SalinityDeviationIndex = deviationSal;
+                modelPriorityList.Add(latestRecord);
+            }
         }
 
-        modelPriorityList = modelPriorityList.OrderByDescending(u => u.Priority).ToList();
+        modelPriorityList = modelPriorityList.OrderByDescending(u => u.PriorityAbsolute).ToList();
     }
 }

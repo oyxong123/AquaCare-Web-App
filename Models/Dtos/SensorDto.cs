@@ -30,6 +30,7 @@ namespace AquaCare_Web_App.Models.Dtos
         public decimal SalinityDeviationIndex { get; set; }
         [Column(TypeName = "decimal(8,4)")]
         public decimal TurbidityDeviationIndex { get; set; }
+        public decimal PriorityAbsolute { get; set; }
         public decimal Priority { get; set; }
     }
 }
