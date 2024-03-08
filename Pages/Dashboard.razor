@@ -8,10 +8,10 @@
         <MudItem xs="12" sm="5">
             <MudPaper Elevation="2" Class="pa-4" Style="height: 100%">
                 <MudStack Spacing="3">
-                    <MudText Typo="Typo.h5" Class="d-flex" Style="justify-content: center; font-weight:bold;">Priority</MudText>
+                    <MudText Typo="Typo.h6" Class="d-flex" Style="justify-content: center; font-weight:bold;">Priority</MudText>
                     <MudDivider />
                     <MudStack Spacing="1">
-                        @foreach (SensorDto model in modelPriorityList)
+                        @foreach (SensorPriorityDto model in modelPriorityList)
                         {
                             if (model.Priority > 5)
                             {
@@ -40,7 +40,23 @@
                             else if (model.Priority > 1)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ace340">
-
+                                    <MudGrid Style="height: 100%; align-content:center" Justify="Justify.Center" Spacing="0">        
+                                        <MudItem xs="2">
+                                            <MudText Typo="Typo.caption">@model.Model</MudText>
+                                        </MudItem>
+                                        <MudItem xs="1">
+                                            <MudText>|</MudText>
+                                        </MudItem>
+                                        <MudItem xs="5">
+                                            <MudText Typo="Typo.caption">@model.Property: @model.Priority</MudText>
+                                        </MudItem>
+                                        <MudItem xs="1">
+                                            <MudText>|</MudText>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText Typo="Typo.caption">Slightly High</MudText>
+                                        </MudItem>
+                                    </MudGrid>
                                 </MudPaper>
                             }
                             else if (model.Priority < -5)
@@ -79,102 +95,119 @@
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="7">
-            <MudGrid>
+            <MudGrid Spacing="1">
                 <MudItem xs="12">
                     <MudPaper Elevation="2" Class="pa-4" Style="height: 260px;">
-                        <MudCarousel Class="mud-width-full" Style="height: 100%" AutoCycle="true" TData="object">
-                            <MudCarouselItem Transition="Transition.Slide" Style="height: 100%; padding-left: 50px; padding-right: 50px; padding-bottom: 50px;">
-                                <RadzenChart Style="height: 100%">
-                                    @foreach (List<SensorDto> modelRecordList in modelRecordLists)
-                                    {
-                                        <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
-                                            <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
-                                            <RadzenSeriesDataLabels />
-                                        </RadzenLineSeries>
-                                    }
-                                    <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
-                                        <RadzenAxisTitle Text="Day" />
-                                    </RadzenCategoryAxis>
-                                    <RadzenValueAxis>
-                                        <RadzenGridLines Visible="true" />
-                                        <RadzenAxisTitle Text="pH" />
-                                    </RadzenValueAxis>
-                                </RadzenChart>
-                            </MudCarouselItem>
-@* 
-                            <MudCarouselItem Transition="Transition.Slide" Style="height: 100%">
-                                <RadzenChart>
-                                    @foreach (List<SensorDto> modelRecordList in modelRecordLists)
-                                    {
-                                        <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Day" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
-                                            <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
-                                            <RadzenSeriesDataLabels />
-                                        </RadzenLineSeries>
-                                    }
-                                    <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
-                                    <RadzenValueAxis>
-                                        <RadzenGridLines Visible="true" />
-                                        <RadzenAxisTitle Text="pH" />
-                                    </RadzenValueAxis>
-                                </RadzenChart>
-                            </MudCarouselItem>
-                            <MudCarouselItem Transition="Transition.Slide" Style="height: 100%">
-                                <RadzenChart>
-                                    @foreach (List<SensorDto> modelRecordList in modelRecordLists)
-                                    {
-                                        <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Day" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
-                                            <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
-                                            <RadzenSeriesDataLabels />
-                                        </RadzenLineSeries>
-                                    }
-                                    <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
-                                    <RadzenValueAxis>
-                                        <RadzenGridLines Visible="true" />
-                                        <RadzenAxisTitle Text="pH" />
-                                    </RadzenValueAxis>
-                                </RadzenChart>
-                            </MudCarouselItem>
-                            <MudCarouselItem Transition="Transition.Slide" Style="height: 100%">
-                                <RadzenChart>
-                                    @foreach (List<SensorDto> modelRecordList in modelRecordLists)
-                                    {
-                                        <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Day" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
-                                            <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
-                                            <RadzenSeriesDataLabels />
-                                        </RadzenLineSeries>
-                                    }
-                                    <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
-                                    <RadzenValueAxis>
-                                        <RadzenGridLines Visible="true" />
-                                        <RadzenAxisTitle Text="pH" />
-                                    </RadzenValueAxis>
-                                </RadzenChart>
-                            </MudCarouselItem>
-                            <MudCarouselItem Transition="Transition.Slide" Style="height: 100%">
-                                <RadzenChart>
-                                    @foreach (List<SensorDto> modelRecordList in modelRecordLists)
-                                    {
-                                        <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Day" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
-                                            <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
-                                            <RadzenSeriesDataLabels />
-                                        </RadzenLineSeries>
-                                    }
-                                    <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
-                                    <RadzenValueAxis>
-                                        <RadzenGridLines Visible="true" />
-                                        <RadzenAxisTitle Text="pH" />
-                                    </RadzenValueAxis>
-                                </RadzenChart>
-                            </MudCarouselItem> *@
-                        </MudCarousel>
+                        <MudStack Spacing="3" Style="height: 100%;">
+                            <MudText Typo="Typo.h6" Class="d-flex" Style="justify-content: center; font-weight:bold;">Last Week Statistics</MudText>
+                            <MudDivider />
+                            <MudCarousel Class="mud-width-full" Style="height: 80%" AutoCycle="true" TData="object" ShowBullets="false">
+                                <MudCarouselItem Transition="Transition.Slide" Style="height: 100%; padding-left: 50px; padding-right: 50px;">
+                                    <RadzenChart Style="height: 100%">
+                                        @foreach (List<SensorDto> modelRecordList in modelRecordLists)
+                                        {
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                        }
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                            <RadzenAxisTitle Text="Day" />
+                                        </RadzenCategoryAxis>
+                                        <RadzenValueAxis>
+                                            <RadzenGridLines Visible="true" />
+                                            <RadzenAxisTitle Text="pH" />
+                                        </RadzenValueAxis>
+                                    </RadzenChart>
+                                </MudCarouselItem>
+                                <MudCarouselItem Transition="Transition.Slide" Style="height: 100%; padding-left: 50px; padding-right: 50px;">
+                                    <RadzenChart Style="height: 100%">
+                                        @foreach (List<SensorDto> modelRecordList in modelRecordLists)
+                                        {
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Temperature" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                        }
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                            <RadzenAxisTitle Text="Day" />
+                                        </RadzenCategoryAxis>
+                                        <RadzenValueAxis>
+                                            <RadzenGridLines Visible="true" />
+                                            <RadzenAxisTitle Text="Temperature" />
+                                        </RadzenValueAxis>
+                                    </RadzenChart>
+                                </MudCarouselItem>
+                                <MudCarouselItem Transition="Transition.Slide" Style="height: 100%; padding-left: 50px; padding-right: 50px;">
+                                    <RadzenChart Style="height: 100%">
+                                        @foreach (List<SensorDto> modelRecordList in modelRecordLists)
+                                        {
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="SunlightIntensity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                        }
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                            <RadzenAxisTitle Text="Day" />
+                                        </RadzenCategoryAxis>
+                                        <RadzenValueAxis>
+                                            <RadzenGridLines Visible="true" />
+                                            <RadzenAxisTitle Text="Sunlight Intensity" />
+                                        </RadzenValueAxis>
+                                    </RadzenChart>
+                                </MudCarouselItem>
+                                <MudCarouselItem Transition="Transition.Slide" Style="height: 100%; padding-left: 50px; padding-right: 50px;">
+                                    <RadzenChart Style="height: 100%">
+                                        @foreach (List<SensorDto> modelRecordList in modelRecordLists)
+                                        {
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Salinity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                        }
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                            <RadzenAxisTitle Text="Day" />
+                                        </RadzenCategoryAxis>
+                                        <RadzenValueAxis>
+                                            <RadzenGridLines Visible="true" />
+                                            <RadzenAxisTitle Text="Salinity" />
+                                        </RadzenValueAxis>
+                                    </RadzenChart>
+                                </MudCarouselItem>
+                                <MudCarouselItem Transition="Transition.Slide" Style="height: 100%; padding-left: 50px; padding-right: 50px;">
+                                    <RadzenChart Style="height: 100%">
+                                        @foreach (List<SensorDto> modelRecordList in modelRecordLists)
+                                        {
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Turbidity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                        }
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                            <RadzenAxisTitle Text="Day" />
+                                        </RadzenCategoryAxis>
+                                        <RadzenValueAxis>
+                                            <RadzenGridLines Visible="true" />
+                                            <RadzenAxisTitle Text="Turbidity" />
+                                        </RadzenValueAxis>
+                                    </RadzenChart>
+                                </MudCarouselItem>
+                            </MudCarousel>
+                        </MudStack>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
-                        @foreach (SensorDto modelRecordAverage in modelRecordAverageList)
-                        {
-                            
-                        }
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 240px;">
+                        <MudStack Spacing="3" Style="height: 100%;">
+                            <MudText Typo="Typo.h6" Class="d-flex" Style="justify-content: center; font-weight:bold;">Average Statistics</MudText>
+                            <MudDivider />
+                            <MudDataGrid Items="@modelRecordAverageList" Style="height: 80%" ColumnResizeMode="ResizeMode.Container" SortMode="SortMode.None" FixedHeader ItemSize="10">
+                                <Columns>
+                                    <PropertyColumn Property="u => u.Model" Title="Model" Resizable="false" />
+                                    <PropertyColumn Property="u => u.Ph" Title="pH" Resizable="false" />
+                                    <PropertyColumn Property="u => u.Temperature" Title="Temperature" Resizable="false" />
+                                    <PropertyColumn Property="u => u.SunlightIntensity" Title="Sunlight Intensity" Resizable="false" />
+                                    <PropertyColumn Property="u => u.Turbidity" Title="Turbidity" Resizable="false" />
+                                    <PropertyColumn Property="u => u.Salinity" Title="Salinity" Resizable="false" />
+                                </Columns>
+                                <PagerContent />
+                            </MudDataGrid>
+                        </MudStack>
                     </MudPaper>
                 </MudItem>
             </MudGrid>
@@ -185,7 +218,7 @@
 @code {
     List<SensorDto> modelAllRecordList = [];  // List of all records from each model.
     List<SensorDto> latestModelRecordList = [];  // List of latest record from each model.
-    List<SensorDto> modelPriorityList = [];  // List of records that requires attention.
+    List<SensorPriorityDto> modelPriorityList = [];  // List of records that requires attention.
     List<SensorDto> modelRecordAverageList = [];  // List of average record from each model.
     List<List<SensorDto>> modelRecordLists = [];  // List of list of records from all models.
     List<string> modelList = [];  // List of all model names.
@@ -194,6 +227,13 @@
     decimal optimalSun = 400;
     decimal optimalTurb = 2.6m;
     decimal optimalSal = 35;
+
+    public class DeviationDto
+    {
+        public string Property { get; set; } = "";
+        public decimal Value {get; set;}
+        public decimal Deviation { get; set; }
+    }
 
     protected async override Task OnInitializedAsync()
     {
@@ -236,25 +276,62 @@
             deviationTurb = (turb - optimalTurb) / 0.3m;
             deviationSal = (sal - optimalSal) / 2;
 
-            // Find the highest emergency deviation, either positive or negative
-            List<decimal> deviationList = [deviationPh, deviationTemp, deviationSun, deviationTurb, deviationSal];
-            decimal deviationMax = deviationList.Max();
-            decimal deviationMin = deviationList.Min();
-            latestRecord.Priority = deviationMax > Math.Abs(deviationMin) 
-                ? deviationMax 
-                : deviationMin;
-            latestRecord.PriorityAbsolute = deviationMax > Math.Abs(deviationMin)
-            ? deviationMax
-            : Math.Abs(deviationMin);
-
-            if (latestRecord.Priority > 1 || latestRecord.Priority < -1)
+            // IDictionary<string, decimal> deviationList = new Dictionary<string, decimal>()
+            // { 
+            //     { "pH",  deviationPh }, 
+            //     { "Temperature", deviationTemp },            
+            //     { "Sunlight Intensity", deviationSun},
+            //     { "Turbidity", deviationTurb},
+            //     { "Salinity", deviationSal}
+            // };
+            List<DeviationDto> deviationList = new()
             {
-                latestRecord.PhDeviationIndex = deviationPh;
-                latestRecord.TemperatureDeviationIndex = deviationTemp;
-                latestRecord.SunlightIntensityDeviationIndex = deviationSun;
-                latestRecord.TurbidityDeviationIndex = deviationTurb;
-                latestRecord.SalinityDeviationIndex = deviationSal;
-                modelPriorityList.Add(latestRecord);
+                new DeviationDto
+                {
+                    Property = "pH",
+                    Value = ph,
+                    Deviation = deviationPh
+                },
+                new DeviationDto
+                {
+                    Property = "Temperature",
+                    Value = temp,
+                    Deviation = deviationTemp
+                },
+                new DeviationDto
+                {
+                    Property = "Sunlight Intensity",
+                    Value = sun,
+                    Deviation = deviationSun
+                },
+                new DeviationDto
+                {
+                    Property = "Turbidity",
+                    Value = turb,
+                    Deviation = deviationTurb
+                },
+                new DeviationDto
+                {
+                    Property = "Salinity",
+                    Value = sal,
+                    Deviation = deviationSal
+                }
+            };
+            foreach (DeviationDto deviationObj in deviationList)
+            {
+                if (deviationObj.Deviation > 1 || deviationObj.Deviation < -1)
+                {
+                    SensorPriorityDto sensorPriority = new()
+                    {
+                        Id = latestRecord.Id,
+                        Model = latestRecord.Model,
+                        Property = deviationObj.Property,
+                        PropertyValue = deviationObj.Value,
+                        Priority = deviationObj.Deviation,
+                        PriorityAbsolute = Math.Abs(deviationObj.Deviation)
+                    };
+                    modelPriorityList.Add(sensorPriority);
+                }
             }
         }
 
