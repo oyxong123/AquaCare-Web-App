@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -6,18 +7,18 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText>@DateTime.Now.ToString("dd/MM/yyyy")</MudText>
+        <MudText>@dateNow</MudText>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
         <MudText>@accName</MudText>
         <MudSpacer />
-        <MudText>@DateTime.Now.ToString("HH:mm:ss")</MudText>
+        <MudText>@timeNow</MudText>
     </MudAppBar>
     <MudDrawer Open="true" Elevation="2">
         <MudDrawerHeader Class="px-0 py-0">
             <MudPaper Width="300px" Class="py-0" Elevation="0">
                 <MudNavMenu>
-                    <MudText Typo="Typo.h6" Class="px-4 py-3 d-flex" Style="height: 64px;justify-content:center; align-content:center; background-color:lightskyblue">AquaMon</MudText>
+                    <MudText Typo="Typo.h6" Class="px-4 py-3 d-flex" Style="height: 64px; flex-wrap: wrap; justify-content:center; align-content:center; background-color:lightskyblue">AquaMon</MudText>
                     <MudDivider />
                     <MudNavLink Href="/dashboard" Match="NavLinkMatch.All">Dashboard</MudNavLink>
                     <MudNavLink Href="/systems" Match="NavLinkMatch.All">Systems</MudNavLink>
@@ -32,5 +33,27 @@
 </MudLayout>
 
 @code {
-    string accName = "Yx";
+    private string accName = "Yx";
+    private string dateNow = "";
+    private string timeNow = "";
+    private static System.Timers.Timer _timer = new();
+
+    protected override void OnInitialized()
+    {
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += (sender, eventArgs) => CountDownTimer();
+        _timer.Enabled = true;
+    }
+
+    public async void CountDownTimer()
+    {
+        dateNow = DateTime.Now.ToString("dd/MM/yyyy");
+        timeNow = DateTime.Now.ToString("HH:mm:ss");
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
 }
