@@ -1,7 +1,9 @@
 ﻿@page "/dashboard"
 @using Models.Dtos
 @using Services
+@using AquaCare_Web_App.Components
 @inject ISensorService ISensorService
+@inject NavigationManager Nav
 
 <MudContainer Class="mt-8 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
@@ -16,77 +18,61 @@
                             if (model.Priority > 5)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#f21616">
-
+                                    <ModelPriorityBox Model="@model" State="Extremely High" />
                                 </MudPaper>
                             }
                             else if (model.Priority > 4)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ed4734">
-
+                                    <ModelPriorityBox Model="@model" State="Very High" />
                                 </MudPaper>
                             }
                             else if (model.Priority > 3)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e88d43">
-
+                                    <ModelPriorityBox Model="@model" State="Moderately High" />
                                 </MudPaper>
                             }
                             else if (model.Priority > 2)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e8cf43">
-
+                                    <ModelPriorityBox Model="@model" State="High" />
                                 </MudPaper>
                             }
                             else if (model.Priority > 1)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ace340">
-                                    <MudGrid Style="height: 100%; align-content:center" Justify="Justify.Center" Spacing="0">        
-                                        <MudItem xs="2">
-                                            <MudText Typo="Typo.caption">@model.Model</MudText>
-                                        </MudItem>
-                                        <MudItem xs="1">
-                                            <MudText>|</MudText>
-                                        </MudItem>
-                                        <MudItem xs="5">
-                                            <MudText Typo="Typo.caption">@model.Property: @model.Priority</MudText>
-                                        </MudItem>
-                                        <MudItem xs="1">
-                                            <MudText>|</MudText>
-                                        </MudItem>
-                                        <MudItem xs="3">
-                                            <MudText Typo="Typo.caption">Slightly High</MudText>
-                                        </MudItem>
-                                    </MudGrid>
+                                    <ModelPriorityBox Model="@model" State="Slightly High" />
                                 </MudPaper>
                             }
                             else if (model.Priority < -5)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#f21616">
-                                    
+                                    <ModelPriorityBox Model="@model" State="Extremely Low" />
                                 </MudPaper>
                             }
                             else if (model.Priority < -4)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ed4734">
-
+                                    <ModelPriorityBox Model="@model" State="Very Low" />
                                 </MudPaper>
                             }
                             else if (model.Priority < -3)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e88d43">
-
+                                    <ModelPriorityBox Model="@model" State="Moderately Low" />
                                 </MudPaper>
                             }
                             else if (model.Priority < -2)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#e8cf43">
-
+                                    <ModelPriorityBox Model="@model" State="Low" />
                                 </MudPaper>
                             }
                             else if (model.Priority < -1)
                             {
                                 <MudPaper Elevation="1" Class="pa-4" Style="height: 60px; background-color:#ace340">
-
+                                    <ModelPriorityBox Model="@model" State="Slightly Low" />
                                 </MudPaper>
                             }
                         }
@@ -110,7 +96,7 @@
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
-                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
                                             <RadzenAxisTitle Text="Day" />
                                         </RadzenCategoryAxis>
                                         <RadzenValueAxis>
@@ -127,7 +113,7 @@
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
-                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
                                             <RadzenAxisTitle Text="Day" />
                                         </RadzenCategoryAxis>
                                         <RadzenValueAxis>
@@ -144,7 +130,7 @@
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
-                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
                                             <RadzenAxisTitle Text="Day" />
                                         </RadzenCategoryAxis>
                                         <RadzenValueAxis>
@@ -161,7 +147,7 @@
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
-                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
                                             <RadzenAxisTitle Text="Day" />
                                         </RadzenCategoryAxis>
                                         <RadzenValueAxis>
@@ -178,7 +164,7 @@
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
-                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth">
+                                        <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
                                             <RadzenAxisTitle Text="Day" />
                                         </RadzenCategoryAxis>
                                         <RadzenValueAxis>
@@ -192,7 +178,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 240px;">
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 230px;">
                         <MudStack Spacing="3" Style="height: 100%;">
                             <MudText Typo="Typo.h6" Class="d-flex" Style="justify-content: center; font-weight:bold;">Average Statistics</MudText>
                             <MudDivider />
@@ -251,11 +237,11 @@
             // Calculate average properties from the past 7 days for all models.
             SensorDto modelRecordAverage = new();
             modelRecordAverage.Model = model;
-            modelRecordAverage.Ph = modelRecordList.Average(u => u.Ph);
-            modelRecordAverage.Temperature = modelRecordList.Average(u => u.Temperature);
-            modelRecordAverage.SunlightIntensity = modelRecordList.Average(u => u.SunlightIntensity);
-            modelRecordAverage.Turbidity = modelRecordList.Average(u => u.Turbidity);
-            modelRecordAverage.Salinity = modelRecordList.Average(u => u.Salinity);
+            modelRecordAverage.Ph = decimal.Round(modelRecordList.Average(u => u.Ph), 2);
+            modelRecordAverage.Temperature = decimal.Round(modelRecordList.Average(u => u.Temperature), 2);
+            modelRecordAverage.SunlightIntensity = decimal.Round(modelRecordList.Average(u => u.SunlightIntensity), 2);
+            modelRecordAverage.Turbidity = decimal.Round(modelRecordList.Average(u => u.Turbidity), 2);
+            modelRecordAverage.Salinity = decimal.Round(modelRecordList.Average(u => u.Salinity), 2);
             modelRecordAverageList.Add(modelRecordAverage);
         }
 
@@ -276,14 +262,6 @@
             deviationTurb = (turb - optimalTurb) / 0.3m;
             deviationSal = (sal - optimalSal) / 2;
 
-            // IDictionary<string, decimal> deviationList = new Dictionary<string, decimal>()
-            // { 
-            //     { "pH",  deviationPh }, 
-            //     { "Temperature", deviationTemp },            
-            //     { "Sunlight Intensity", deviationSun},
-            //     { "Turbidity", deviationTurb},
-            //     { "Salinity", deviationSal}
-            // };
             List<DeviationDto> deviationList = new()
             {
                 new DeviationDto
@@ -326,7 +304,7 @@
                         Id = latestRecord.Id,
                         Model = latestRecord.Model,
                         Property = deviationObj.Property,
-                        PropertyValue = deviationObj.Value,
+                        PropertyValue = decimal.Round(deviationObj.Value, 2),
                         Priority = deviationObj.Deviation,
                         PriorityAbsolute = Math.Abs(deviationObj.Deviation)
                     };
@@ -338,7 +316,21 @@
         modelPriorityList = modelPriorityList.OrderByDescending(u => u.PriorityAbsolute).ToList();
     }
 
-    string FormatAsMonth(object value)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Data refreshes every 5 minutes.
+            var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+            while (await timer.WaitForNextTickAsync())
+            {
+                await OnInitializedAsync();
+                await InvokeAsync(() => StateHasChanged());
+            }
+        }
+    }
+
+    string FormatAsDay(object value)
     {
         if (value != null)
         {

@@ -1,5 +1,41 @@
-﻿<h3>ModelPriorityBox</h3>
+﻿@using Models.Dtos
+
+<style>
+    .vertical-line {
+        border-left: 1px solid black;
+        height: 100%;
+    }
+</style>
+
+<MudGrid Style="height: 100%; align-content:center" Justify="Justify.SpaceEvenly" Spacing="0">
+    <MudItem xs="2">
+        <MudText Typo="Typo.caption">@Model.Model</MudText>
+    </MudItem>
+    <MudItem xs="1" Style="flex-basis:0%">
+        <div class="vertical-line" />
+    </MudItem>
+    <MudItem xs="5">
+        <MudText Typo="Typo.caption">@Model.Property: @Model.PropertyValue</MudText>
+    </MudItem>
+    <MudItem xs="1" Style="flex-basis:0%">
+        <div class="vertical-line" />
+    </MudItem>
+    <MudItem xs="3">
+        <MudText Typo="Typo.caption">@State</MudText>
+    </MudItem>
+</MudGrid>
 
 @code {
+    [Parameter] public SensorPriorityDto Model { get; set; }
+    [Parameter] public string State { get; set; } = "?";
 
+    protected override Task OnParametersSetAsync()
+    {
+        if(Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+
+        return base.OnParametersSetAsync();
+    }
 }

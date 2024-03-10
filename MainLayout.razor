@@ -9,8 +9,10 @@
     <MudAppBar Elevation="1">
         <MudText>@dateNow</MudText>
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
-        <MudText>@accName</MudText>
+        <MudAvatar Style="height: 35px; width: 35px">
+            <MudImage Src="Resources/pic.jpg"></MudImage>
+        </MudAvatar>
+        <MudText Style="padding-left: 10px;">@accName</MudText>
         <MudSpacer />
         <MudText>@timeNow</MudText>
     </MudAppBar>

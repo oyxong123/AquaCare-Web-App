@@ -10,22 +10,22 @@
             @foreach (var system in systemList)
             {
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="2" Class="pa-4" Style="height: 100%" onclick="@(() => OpenSensorData(system.Model))">
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; cursor: pointer" onclick="@(() => OpenSensorData(system.Model))">
                         <MudStack Spacing="3">
                             <MudText Typo="Typo.h6">Model: @system.Model</MudText>
                             <MudGrid>
                                 <MudItem xs="6">
                                     <MudStack>
                                         <MudText Typo="Typo.caption">Timestamp: @system.Timestamp</MudText>
-                                        <MudText Typo="Typo.caption">pH: @system.Ph</MudText>
-                                        <MudText Typo="Typo.caption">Temperature: @system.Temperature</MudText>
+                                        <MudText Typo="Typo.caption">pH: @(ConvertToTwoDecimalPoint(system.Ph))</MudText>
+                                        <MudText Typo="Typo.caption">Temperature: @(ConvertToTwoDecimalPoint(system.Temperature))</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="6">
                                     <MudStack>
-                                        <MudText Typo="Typo.caption">Sunlight Intensity: @system.SunlightIntensity</MudText>
-                                        <MudText Typo="Typo.caption">Turbidity: @system.Turbidity</MudText>
-                                        <MudText Typo="Typo.caption">Salinity: @system.Salinity</MudText>
+                                        <MudText Typo="Typo.caption">Sunlight Intensity: @(ConvertToTwoDecimalPoint(system.SunlightIntensity))</MudText>
+                                        <MudText Typo="Typo.caption">Turbidity: @(ConvertToTwoDecimalPoint(system.Turbidity))</MudText>
+                                        <MudText Typo="Typo.caption">Salinity: @(ConvertToTwoDecimalPoint(system.Salinity))</MudText>
                                     </MudStack>
                                 </MudItem>
                             </MudGrid>
@@ -39,19 +39,132 @@
 else if(page == "sensor")
 {
     <MudContainer Class="mt-8 px-8" MaxWidth="MaxWidth.False">
-        <MudGrid>
+        <MudGrid Spacing="5">
             <MudItem xs="12">
-                <MudText Typo="Typo.h6">Model: @sensorModel</MudText>
+                <MudStack Spacing="2">
+                    <MudStack>
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="ReturnToSystemsPage" Style="padding: 0px; position: absolute; left: 280px; top:100px" aria-label="back"></MudIconButton>
+                        <MudText Typo="Typo.h6" Style="display: flex; justify-content:center;">Model: @sensorModel</MudText>
+                        <MudDivider />
+                    </MudStack>
+                    <MudPaper Class="px-5 py-5" Style="">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2">Last retrieval datetime: @sensorRecordLatest.Timestamp</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2">Date installed: 22/01/2024</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudStack>
             </MudItem>
             <MudItem xs="12">
                 <MudStack Spacing="2">
                     <MudText Typo="Typo.h6" Style="display: flex; justify-content:center;">Last Week Statistics</MudText>
-                    
+                    <MudDivider />
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" sm="6">
+                                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px; padding-left: 30px; padding-right: 30px;">
+                                        <RadzenChart Style="height: 100%">
+                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                            <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
+                                                <RadzenAxisTitle Text="Day" />
+                                            </RadzenCategoryAxis>
+                                            <RadzenValueAxis>
+                                                <RadzenGridLines Visible="true" />
+                                                <RadzenAxisTitle Text="pH" />
+                                            </RadzenValueAxis>
+                                        </RadzenChart>
+                                    </MudPaper>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
+                                        <RadzenChart Style="height: 100%">
+                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Temperature" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                            <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
+                                                <RadzenAxisTitle Text="Day" />
+                                            </RadzenCategoryAxis>
+                                            <RadzenValueAxis>
+                                                <RadzenGridLines Visible="true" />
+                                                <RadzenAxisTitle Text="Temperature" />
+                                            </RadzenValueAxis>
+                                        </RadzenChart>
+                                    </MudPaper>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" sm="6">
+                                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px; padding-left: 30px; padding-right: 30px;">
+                                        <RadzenChart Style="height: 100%">
+                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="SunlightIntensity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                            <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
+                                                <RadzenAxisTitle Text="Day" />
+                                            </RadzenCategoryAxis>
+                                            <RadzenValueAxis>
+                                                <RadzenGridLines Visible="true" />
+                                                <RadzenAxisTitle Text="Sunlight Intensity" />
+                                            </RadzenValueAxis>
+                                        </RadzenChart>
+                                    </MudPaper>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
+                                        <RadzenChart Style="height: 100%">
+                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Turbidity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                            <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
+                                                <RadzenAxisTitle Text="Day" />
+                                            </RadzenCategoryAxis>
+                                            <RadzenValueAxis>
+                                                <RadzenGridLines Visible="true" />
+                                                <RadzenAxisTitle Text="Turbidity" />
+                                            </RadzenValueAxis>
+                                        </RadzenChart>
+                                    </MudPaper>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" sm="3" />
+                                <MudItem xs="12" sm="6">
+                                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px; padding-left: 30px; padding-right: 30px;">
+                                        <RadzenChart Style="height: 100%">
+                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Salinity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                                <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
+                                            </RadzenLineSeries>
+                                            <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
+                                                <RadzenAxisTitle Text="Day" />
+                                            </RadzenCategoryAxis>
+                                            <RadzenValueAxis>
+                                                <RadzenGridLines Visible="true" />
+                                                <RadzenAxisTitle Text="Salinity" />
+                                            </RadzenValueAxis>
+                                        </RadzenChart>
+                                    </MudPaper>
+                                </MudItem>
+                                <MudItem xs="12" sm="3" />
+                            </MudGrid>
+                        </MudItem>
+                    </MudGrid>
                 </MudStack>
             </MudItem>
             <MudItem xs="12">
                 <MudStack Spacing="2">
                     <MudText Typo="Typo.h6" Style="display: flex; justify-content:center;">Record History</MudText>
+                    <MudDivider />
                     <MudTable Items="@sensorRecords" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@tableLoading" LoadingProgressColor="Color.Info">
                         <HeaderContent>
                             <MudTh>Date</MudTh>
@@ -65,11 +178,11 @@ else if(page == "sensor")
                         <RowTemplate>
                             <MudTd DataLabel="Date">@context.Timestamp.ToString("dd/MM/yyyy")</MudTd>
                             <MudTd DataLabel="Time">@context.Timestamp.ToString("HH:mm:ss")</MudTd>
-                            <MudTd DataLabel="pH">@context.Ph</MudTd>
-                            <MudTd DataLabel="Temperature">@context.Temperature</MudTd>
-                            <MudTd DataLabel="Sunlight Intensity">@context.SunlightIntensity</MudTd>
-                            <MudTd DataLabel="Turbidity">@context.Turbidity</MudTd>
-                            <MudTd DataLabel="Salinity">@context.Salinity</MudTd>
+                            <MudTd DataLabel="pH">@(ConvertToTwoDecimalPoint(context.Ph))</MudTd>
+                            <MudTd DataLabel="Temperature">@(ConvertToTwoDecimalPoint(context.Temperature))</MudTd>
+                            <MudTd DataLabel="Sunlight Intensity">@(ConvertToTwoDecimalPoint(context.SunlightIntensity))</MudTd>
+                            <MudTd DataLabel="Turbidity">@(ConvertToTwoDecimalPoint(context.Turbidity))</MudTd>
+                            <MudTd DataLabel="Salinity">@(ConvertToTwoDecimalPoint(context.Salinity))</MudTd>
                         </RowTemplate>
                     </MudTable>
                 </MudStack>
@@ -77,11 +190,17 @@ else if(page == "sensor")
             
         </MudGrid>
     </MudContainer>
+    <MudScrollToTop>
+        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowUpward" />
+    </MudScrollToTop>
 }
 
 @code {
     List<SensorDto> systemList = new();
     List<SensorDto> sensorRecords = new();
+    SensorDto sensorRecordLatest = new();
+    SensorDto sensorRecordAverage = new();
+    List<SensorDto> sensorRecordsPreviousWeek = new();
     string sensorModel = "";
     string page = "systems";
     bool tableLoading = false;
@@ -91,11 +210,54 @@ else if(page == "sensor")
         systemList = await ISensorService.GetLatestSystemRecords();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Data refreshes every 5 minutes.
+            var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+            while (await timer.WaitForNextTickAsync())
+            {
+                await OnInitializedAsync();
+                await InvokeAsync(() => StateHasChanged());
+            }
+        }
+    }
+
     private async void OpenSensorData(string model)
     {
         page = "sensor";
         sensorRecords = await ISensorService.GetSensorRecords(model);
-        sensorModel = sensorRecords.First().Model;
+        sensorRecordLatest = sensorRecords.First();
+        sensorModel = sensorRecordLatest.Model;
+
+        DateTime timestampLimit = DateTime.Now.AddDays(-7);
+        sensorRecordsPreviousWeek = sensorRecords.Where(u => u.Timestamp > timestampLimit).ToList();
+
         StateHasChanged();
     }
+
+    string FormatAsDay(object value)
+    {
+        if (value != null)
+        {
+            return Convert.ToDateTime(value).ToString("ddd");
+        }
+
+        return string.Empty;
+    }
+
+    private async Task ReturnToSystemsPage()
+    {
+        page = "systems";
+        systemList = await ISensorService.GetLatestSystemRecords();
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    private decimal ConvertToTwoDecimalPoint(decimal value)
+    {
+        decimal valueNew = decimal.Round(value, 2);
+        return valueNew;
+    }
+
 }
