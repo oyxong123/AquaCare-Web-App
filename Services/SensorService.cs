@@ -1,7 +1,13 @@
 ﻿using AquaCare_Web_App.Database;
 using AquaCare_Web_App.Models;
 using AquaCare_Web_App.Models.Dtos;
+using FireSharp.Config;
+using FireSharp.Interfaces;
+using FireSharp.Response;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Globalization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AquaCare_Web_App.Services
@@ -27,10 +33,12 @@ namespace AquaCare_Web_App.Services
                         throw new Exception("Sensor" + _textNotInitialized);
                     }
 
+                    var firebaseDb = GetFirebaseDatabase();
+
                     DateTime timestampLimit = DateTime.Now.AddDays(-7);
-                    List<Sensor> sensorModelList = await _context.Sensor
+                    List<Sensor> sensorModelList = firebaseDb
                        .Where(u => u.Timestamp > timestampLimit)
-                       .ToListAsync();
+                       .ToList();
 
                     List<Sensor> filteredList = [];
                     foreach (var model in sensorModelList.GroupBy(u => u.Model))
@@ -80,7 +88,9 @@ namespace AquaCare_Web_App.Services
                         throw new Exception("Sensor" + _textNotInitialized);
                     }
 
-                    var temp = await _context.Sensor.Select(u => u.Model).ToListAsync();
+                    var firebaseDb = GetFirebaseDatabase();
+
+                    var temp = firebaseDb.Select(u => u.Model).ToList();
                     var modelList = temp.Distinct().ToList();
 
                     List<Sensor> sensorModelList = [];
@@ -126,7 +136,9 @@ namespace AquaCare_Web_App.Services
                         throw new Exception("Sensor" + _textNotInitialized);
                     }
 
-                    List<Sensor> sensorModelList = sensorModelList = await _context.Sensor.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).ToListAsync();
+                    var firebaseDb = GetFirebaseDatabase();
+
+                    List<Sensor> sensorModelList = sensorModelList = firebaseDb.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).ToList();
                     List<SensorDto> sensorDtoList = [];
                     foreach (var sensor in sensorModelList)
                     {
@@ -150,6 +162,48 @@ namespace AquaCare_Web_App.Services
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        private List<Sensor> GetFirebaseDatabase()
+        {
+            IFirebaseConfig config = new FirebaseConfig
+            {
+                AuthSecret = " AIzaSyDrT5nfyJL-OjM7PxoMEyQVfX0AGgR_o34",
+                BasePath = "https://aquacare-6f91b-default-rtdb.asia-southeast1.firebasedatabase.app/"
+            };
+            IFirebaseClient client = new FireSharp.FirebaseClient(config);
+            FirebaseResponse response = client.Get("System1");
+            dynamic systems = JsonConvert.DeserializeObject<dynamic>(response.Body);
+            var systemsDataList = new List<Sensor>();
+            if (systems != null)
+            {
+                CultureInfo provider = CultureInfo.InvariantCulture;
+                foreach (var system in systems)
+                {
+                    string model = JsonConvert.DeserializeObject<string>(((JProperty)system).Name.ToString());
+
+                    foreach (var timestamp in system)
+                    {
+
+                        Sensor sensor = new()
+                        {
+                            Model = model
+                        };
+
+                        string datetimeString = JsonConvert.DeserializeObject<string>(((JProperty)timestamp).Name.ToString());
+                        sensor.Timestamp = DateTime.ParseExact(datetimeString, "yyyy-M-d, HH-mm-ss", provider);
+                        sensor.SunlightIntensity = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[0]).Value.ToString());
+                        sensor.Salinity = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[1]).Value.ToString());
+                        sensor.Temperature = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[2]).Value.ToString());
+                        sensor.Turbidity = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[3]).Value.ToString());
+                        sensor.Ph = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[5]).Value.ToString());
+
+                        systemsDataList.Add(sensor);
+                    }
+                }
+            }
+
+            return systemsDataList;
         }
     }
 }
