@@ -96,7 +96,7 @@ namespace AquaCare_Web_App.Services
                     List<Sensor> sensorModelList = [];
                     foreach (string model in modelList)
                     {
-                        Sensor sensorRecord = await _context.Sensor.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).FirstAsync();
+                        Sensor sensorRecord = firebaseDb.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).First();
                         sensorModelList.Add(sensorRecord);
                     }
 
@@ -166,44 +166,74 @@ namespace AquaCare_Web_App.Services
 
         private List<Sensor> GetFirebaseDatabase()
         {
-            IFirebaseConfig config = new FirebaseConfig
+
+            try
             {
-                AuthSecret = " AIzaSyDrT5nfyJL-OjM7PxoMEyQVfX0AGgR_o34",
-                BasePath = "https://aquacare-6f91b-default-rtdb.asia-southeast1.firebasedatabase.app/"
-            };
-            IFirebaseClient client = new FireSharp.FirebaseClient(config);
-            FirebaseResponse response = client.Get("System1");
-            dynamic systems = JsonConvert.DeserializeObject<dynamic>(response.Body);
-            var systemsDataList = new List<Sensor>();
-            if (systems != null)
-            {
-                CultureInfo provider = CultureInfo.InvariantCulture;
-                foreach (var system in systems)
+                IFirebaseConfig config = new FirebaseConfig
                 {
-                    string model = JsonConvert.DeserializeObject<string>(((JProperty)system).Name.ToString());
-
-                    foreach (var timestamp in system)
+                    AuthSecret = " AIzaSyDrT5nfyJL-OjM7PxoMEyQVfX0AGgR_o34",
+                    BasePath = "https://aquacare-6f91b-default-rtdb.asia-southeast1.firebasedatabase.app/"
+                };
+                IFirebaseClient client = new FireSharp.FirebaseClient(config);
+                FirebaseResponse response = client.Get("System");
+                dynamic systems = JsonConvert.DeserializeObject<dynamic>(response.Body);
+                var systemsDataList = new List<Sensor>();
+                if (systems != null)
+                {
+                    CultureInfo provider = CultureInfo.InvariantCulture;
+                    foreach (JProperty system in systems)
                     {
+                        string model = system.Name;
+                        JObject timeStampList = (JObject)system.Value;
 
-                        Sensor sensor = new()
+                        foreach (JProperty timestamp in timeStampList.Properties())
                         {
-                            Model = model
-                        };
 
-                        string datetimeString = JsonConvert.DeserializeObject<string>(((JProperty)timestamp).Name.ToString());
-                        sensor.Timestamp = DateTime.ParseExact(datetimeString, "yyyy-M-d, HH-mm-ss", provider);
-                        sensor.SunlightIntensity = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[0]).Value.ToString());
-                        sensor.Salinity = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[1]).Value.ToString());
-                        sensor.Temperature = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[2]).Value.ToString());
-                        sensor.Turbidity = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[3]).Value.ToString());
-                        sensor.Ph = JsonConvert.DeserializeObject<decimal>(((JProperty)timestamp[5]).Value.ToString());
+                            Sensor sensor = new()
+                            {
+                                Model = model
+                            };
 
-                        systemsDataList.Add(sensor);
+                            string datetimeString = timestamp.Name;
+                            sensor.Timestamp = DateTime.ParseExact(datetimeString, "yyyy-M-d, HH:mm:ss", provider);
+
+                            JObject propertyList = (JObject)timestamp.Value;
+
+                            foreach (JProperty property in propertyList.Properties())
+                            {
+                                if (property.Name == "LightIntensity(LUX)")
+                                {
+                                    sensor.SunlightIntensity = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "Salinity(PSU)")
+                                {
+                                    sensor.Salinity = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "Temperature(C)")
+                                {
+                                    sensor.Temperature = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "Turbidity(NTU)")
+                                {
+                                    sensor.Turbidity = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "pH")
+                                {
+                                    sensor.Ph = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                            }
+
+                            systemsDataList.Add(sensor);
+                        }
                     }
                 }
-            }
 
-            return systemsDataList;
+                return systemsDataList;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
