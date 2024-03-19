@@ -40,6 +40,7 @@ namespace AquaCare_Web_App.Services
                        .Where(u => u.Timestamp > timestampLimit)
                        .ToList();
 
+                    // Get only the latest record for each day.
                     List<Sensor> filteredList = [];
                     foreach (var model in sensorModelList.GroupBy(u => u.Model))
                     {
@@ -51,6 +52,49 @@ namespace AquaCare_Web_App.Services
                         filteredList.AddRange(filteredModel);
                     }
                     sensorModelList = filteredList;
+
+                    List<SensorDto> sensorDtoList = [];
+                    foreach (Sensor sensor in sensorModelList)
+                    {
+                        SensorDto sensorDto = new()
+                        {
+                            Model = sensor.Model,
+                            Timestamp = sensor.Timestamp,
+                            Ph = sensor.Ph,
+                            Salinity = sensor.Salinity,
+                            SunlightIntensity = sensor.SunlightIntensity,
+                            Temperature = sensor.Temperature,
+                            Turbidity = sensor.Turbidity
+                        };
+                        sensorDtoList.Add(sensorDto);
+                    }
+
+                    return sensorDtoList;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<SensorDto>> GetAllSystemsRecordFromLastSevenDays()
+        {
+            try
+            {
+                using (var _context = await _contextFactory.CreateDbContextAsync())
+                {
+                    if (_context.Sensor == null)
+                    {
+                        throw new Exception("Sensor" + _textNotInitialized);
+                    }
+
+                    var firebaseDb = GetFirebaseDatabase();
+
+                    DateTime timestampLimit = DateTime.Now.AddDays(-7);
+                    List<Sensor> sensorModelList = firebaseDb
+                       .Where(u => u.Timestamp > timestampLimit)
+                       .ToList();
 
                     List<SensorDto> sensorDtoList = [];
                     foreach (Sensor sensor in sensorModelList)

@@ -69,7 +69,7 @@ else if(page == "sensor")
                                 <MudItem xs="12" sm="6">
                                     <MudPaper Elevation="2" Class="pa-4" Style="height: 200px; padding-left: 30px; padding-right: 30px;">
                                         <RadzenChart Style="height: 100%">
-                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@latestSensorRecordEachDayOfPreviousWeek" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
@@ -85,7 +85,7 @@ else if(page == "sensor")
                                 <MudItem xs="12" sm="6">
                                     <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
                                         <RadzenChart Style="height: 100%">
-                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Temperature" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@latestSensorRecordEachDayOfPreviousWeek" ValueProperty="Temperature" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
@@ -105,7 +105,7 @@ else if(page == "sensor")
                                 <MudItem xs="12" sm="6">
                                     <MudPaper Elevation="2" Class="pa-4" Style="height: 200px; padding-left: 30px; padding-right: 30px;">
                                         <RadzenChart Style="height: 100%">
-                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="SunlightIntensity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@latestSensorRecordEachDayOfPreviousWeek" ValueProperty="SunlightIntensity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
@@ -121,7 +121,7 @@ else if(page == "sensor")
                                 <MudItem xs="12" sm="6">
                                     <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
                                         <RadzenChart Style="height: 100%">
-                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Turbidity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@latestSensorRecordEachDayOfPreviousWeek" ValueProperty="Turbidity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
@@ -142,7 +142,7 @@ else if(page == "sensor")
                                 <MudItem xs="12" sm="6">
                                     <MudPaper Elevation="2" Class="pa-4" Style="height: 200px; padding-left: 30px; padding-right: 30px;">
                                         <RadzenChart Style="height: 100%">
-                                            <RadzenLineSeries Data="@sensorRecordsPreviousWeek" ValueProperty="Salinity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@latestSensorRecordEachDayOfPreviousWeek" ValueProperty="Salinity" CategoryProperty="Timestamp" Title="@sensorModel" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsDay">
@@ -200,7 +200,7 @@ else if(page == "sensor")
     List<SensorDto> sensorRecords = new();
     SensorDto sensorRecordLatest = new();
     SensorDto sensorRecordAverage = new();
-    List<SensorDto> sensorRecordsPreviousWeek = new();
+    List<SensorDto> latestSensorRecordEachDayOfPreviousWeek = new();
     string sensorModel = "";
     string page = "systems";
     bool tableLoading = false;
@@ -232,7 +232,19 @@ else if(page == "sensor")
         sensorModel = sensorRecordLatest.Model;
 
         DateTime timestampLimit = DateTime.Now.AddDays(-7);
-        sensorRecordsPreviousWeek = sensorRecords.Where(u => u.Timestamp > timestampLimit).ToList();
+        List<SensorDto> sensorRecordsOfPreviousWeek = sensorRecords.Where(u => u.Timestamp > timestampLimit).ToList();
+
+        // Get only the latest record for each day.
+        var filteredModel = sensorRecordsOfPreviousWeek
+            .GroupBy(u => u.Timestamp.Date)
+            .Select(u => u.OrderByDescending(u => u.Timestamp).First())
+            .ToList();
+        latestSensorRecordEachDayOfPreviousWeek = filteredModel;
+        // Make it so the record will be time-insensitive when displayed in graph with Day as x-axis.
+        foreach (SensorDto latestRecordOfTheDay in latestSensorRecordEachDayOfPreviousWeek)
+        {
+            latestRecordOfTheDay.Timestamp = latestRecordOfTheDay.Timestamp.Date;
+        }
 
         StateHasChanged();
     }

@@ -92,7 +92,7 @@
                                     <RadzenChart Style="height: 100%">
                                         @foreach (List<SensorDto> modelRecordList in modelRecordLists)
                                         {
-                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Ph" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
@@ -109,7 +109,7 @@
                                     <RadzenChart Style="height: 100%">
                                         @foreach (List<SensorDto> modelRecordList in modelRecordLists)
                                         {
-                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Temperature" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Temperature" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
@@ -126,7 +126,7 @@
                                     <RadzenChart Style="height: 100%">
                                         @foreach (List<SensorDto> modelRecordList in modelRecordLists)
                                         {
-                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="SunlightIntensity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="SunlightIntensity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
@@ -143,7 +143,7 @@
                                     <RadzenChart Style="height: 100%">
                                         @foreach (List<SensorDto> modelRecordList in modelRecordLists)
                                         {
-                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Salinity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Salinity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
@@ -160,7 +160,7 @@
                                     <RadzenChart Style="height: 100%">
                                         @foreach (List<SensorDto> modelRecordList in modelRecordLists)
                                         {
-                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Turbidity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid">
+                                            <RadzenLineSeries Data="@modelRecordList" ValueProperty="Turbidity" CategoryProperty="Timestamp" Title="@modelRecordList.First().Model" LineType="LineType.Solid" Smooth="true">
                                                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Circle" />
                                             </RadzenLineSeries>
                                         }
@@ -206,7 +206,7 @@
     List<SensorDto> latestModelRecordList = [];  // List of latest record from each model.
     List<SensorPriorityDto> modelPriorityList = [];  // List of records that requires attention.
     List<SensorDto> modelRecordAverageList = [];  // List of average record from each model.
-    List<List<SensorDto>> modelRecordLists = [];  // List of list of records from all models.
+    List<List<SensorDto>> modelRecordLists = [];  // List of each day's latest record from all models.
     List<string> modelList = [];  // List of all model names.
     decimal optimalPh = 7;
     decimal optimalTemp = 22.5m;
@@ -223,7 +223,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        modelAllRecordList = await ISensorService.GetAllLatestSystemsRecordFromLastSevenDays();
+        modelAllRecordList = await ISensorService.GetAllSystemsRecordFromLastSevenDays();
         modelList = modelAllRecordList.Select(u => u.Model).Distinct().ToList();
         foreach (string model in modelList)
         {
@@ -232,7 +232,16 @@
             latestModelRecordList.Add(latestRecord);
 
             List<SensorDto> modelRecordList = modelAllRecordList.Where(u => u.Model == model).ToList();  // List of all records for the specific model.
-            modelRecordLists.Add(modelRecordList);
+
+            // Get the latest record for the past 7 days for all models.
+            List<SensorDto> modelLatestRecordPastSevenDaysList = await ISensorService.GetAllLatestSystemsRecordFromLastSevenDays();
+            modelLatestRecordPastSevenDaysList = modelLatestRecordPastSevenDaysList.Where(u => u.Model == model).ToList();
+            // Make it so the record will be time-insensitive when displayed in graph with Day as x-axis.
+            foreach (SensorDto modelLatestRecordOfTheDay in modelLatestRecordPastSevenDaysList)
+            {
+                modelLatestRecordOfTheDay.Timestamp = modelLatestRecordOfTheDay.Timestamp.Date;
+            }
+            modelRecordLists.Add(modelLatestRecordPastSevenDaysList);
 
             // Calculate average properties from the past 7 days for all models.
             SensorDto modelRecordAverage = new();
