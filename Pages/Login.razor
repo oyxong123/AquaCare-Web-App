@@ -1,5 +1,47 @@
-﻿<h3>Login</h3>
+﻿@page "/login"
+@layout EmptyLayout
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<style>
+    .mud-main-content
+    {
+        padding-top: 0;
+    }
+</style>
+
+<MudContainer Class="" MaxWidth="MaxWidth.False" Style="height: 100vh; background-image: url('/Resources/Blue-Gradient.jpg'); background-repeat: no-repeat; background-size: cover;">
+    <MudGrid Justify="Justify.Center" Style="height: 100%; align-content:center;">
+        <MudItem xs="3" Style="height: 300px">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; width: 400px;">
+                <MudStack Spacing="3">
+                    <MudStack Row Justify="Justify.Center">
+                        <MudText Align="Align.Center" Typo="Typo.h6">AquaMon</MudText>
+                    </MudStack>
+                    <MudTextField @bind-Value="email" Label="Email" Variant="MudBlazor.Variant.Outlined" />
+                    <MudTextField @bind-Value="password" Label="Password" Variant="MudBlazor.Variant.Outlined" InputType="InputType.Password" />
+                    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="PressedLoginBtn">Login</MudButton>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
+    string email = "";
+    string password = "";
+    bool status = true;
 
+    private void PressedLoginBtn()
+    {
+        if (email == "yx@utp.edu.my" && password == "12345")
+        {
+            Snackbar.Add("Successfully logged in.", Severity.Success);
+            Nav.NavigateTo("/dashboard");
+        }
+        else
+        {
+            Snackbar.Add("Incorrect email/password.", Severity.Error);
+        }
+    }
 }

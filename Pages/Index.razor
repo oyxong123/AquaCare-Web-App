@@ -1,9 +1,10 @@
 ﻿@page "/"
+@layout EmptyLayout
 @inject NavigationManager Nav
 
 @code{
     protected override void OnAfterRender(bool firstRender)
     {
-        Nav.NavigateTo("/dashboard");
+        Nav.NavigateTo("/login");
     }
 }
