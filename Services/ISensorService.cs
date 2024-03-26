@@ -6,7 +6,8 @@ namespace AquaCare_Web_App.Services
     {
         Task<List<SensorDto>> GetAllLatestSystemsRecordFromLastSevenDays();
         Task<List<SensorDto>> GetAllSystemsRecordFromLastSevenDays();
-        Task<List<SensorDto>> GetLatestSystemRecords();
+        Task<List<SensorDto>> GetLatestSystemRecordsAsync();
+        List<SensorDto> GetLatestSystemRecords();
         Task<List<SensorDto>> GetSensorRecords(string model);
     }
 }

@@ -121,18 +121,18 @@ namespace AquaCare_Web_App.Services
             }
         }
 
-        public async Task<List<SensorDto>> GetLatestSystemRecords()
+        public List<SensorDto> GetLatestSystemRecords()
         {
             try
             {
-                using (var _context = await _contextFactory.CreateDbContextAsync())
+                using (var _context = _contextFactory.CreateDbContext())
                 {
                     if (_context.Sensor == null)
                     {
                         throw new Exception("Sensor" + _textNotInitialized);
                     }
 
-                    var firebaseDb = GetFirebaseDatabase();
+                    var firebaseDb = GetFirebaseRealtimeDatabase();
 
                     var temp = firebaseDb.Select(u => u.Model).ToList();
                     var modelList = temp.Distinct().ToList();
@@ -168,6 +168,55 @@ namespace AquaCare_Web_App.Services
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<SensorDto>> GetLatestSystemRecordsAsync()
+        {
+            try
+            {
+                using (var _context = await _contextFactory.CreateDbContextAsync())
+                {
+                    if (_context.Sensor == null)
+                    {
+                        throw new Exception("Sensor" + _textNotInitialized);
+                    }
+
+                    var firebaseDb = GetFirebaseRealtimeDatabase();
+
+                    var temp = firebaseDb.Select(u => u.Model).ToList();
+                    var modelList = temp.Distinct().ToList();
+
+                    List<Sensor> sensorModelList = [];
+                    foreach (string model in modelList)
+                    {
+                        Sensor sensorRecord = firebaseDb.Where(u => u.Model == model).OrderByDescending(u => u.Timestamp).First();
+                        sensorModelList.Add(sensorRecord);
+                    }
+
+                    List<SensorDto> sensorDtoList = [];
+                    foreach (Sensor sensor in sensorModelList)
+                    {
+                        SensorDto sensorDto = new()
+                        {
+                            Model = sensor.Model,
+                            Timestamp = sensor.Timestamp,
+                            Ph = sensor.Ph,
+                            Salinity = sensor.Salinity,
+                            SunlightIntensity = sensor.SunlightIntensity,
+                            Temperature = sensor.Temperature,
+                            Turbidity = sensor.Turbidity
+                        };
+                        sensorDtoList.Add(sensorDto);
+                    }
+
+                    return sensorDtoList;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
 
         public async Task<List<SensorDto>> GetSensorRecords(string model)
         {
@@ -220,6 +269,77 @@ namespace AquaCare_Web_App.Services
                 };
                 IFirebaseClient client = new FireSharp.FirebaseClient(config);
                 FirebaseResponse response = client.Get("System");
+                dynamic systems = JsonConvert.DeserializeObject<dynamic>(response.Body);
+                var systemsDataList = new List<Sensor>();
+                if (systems != null)
+                {
+                    CultureInfo provider = CultureInfo.InvariantCulture;
+                    foreach (JProperty system in systems)
+                    {
+                        string model = system.Name;
+                        JObject timeStampList = (JObject)system.Value;
+
+                        foreach (JProperty timestamp in timeStampList.Properties())
+                        {
+
+                            Sensor sensor = new()
+                            {
+                                Model = model
+                            };
+
+                            string datetimeString = timestamp.Name;
+                            sensor.Timestamp = DateTime.ParseExact(datetimeString, "yyyy-M-d, HH:mm:ss", provider);
+
+                            JObject propertyList = (JObject)timestamp.Value;
+
+                            foreach (JProperty property in propertyList.Properties())
+                            {
+                                if (property.Name == "LightIntensity(LUX)")
+                                {
+                                    sensor.SunlightIntensity = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "Salinity(PSU)")
+                                {
+                                    sensor.Salinity = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "Temperature(C)")
+                                {
+                                    sensor.Temperature = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "Turbidity(NTU)")
+                                {
+                                    sensor.Turbidity = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                                if (property.Name == "pH")
+                                {
+                                    sensor.Ph = JsonConvert.DeserializeObject<decimal>(property.Value.ToString());
+                                }
+                            }
+
+                            systemsDataList.Add(sensor);
+                        }
+                    }
+                }
+
+                return systemsDataList;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        private List<Sensor> GetFirebaseRealtimeDatabase()
+        {
+
+            try
+            {
+                IFirebaseConfig config = new FirebaseConfig
+                {
+                    AuthSecret = " AIzaSyDrT5nfyJL-OjM7PxoMEyQVfX0AGgR_o34",
+                    BasePath = "https://aquacare-6f91b-default-rtdb.asia-southeast1.firebasedatabase.app/"
+                };
+                IFirebaseClient client = new FireSharp.FirebaseClient(config);
+                FirebaseResponse response = client.Get("RSystem");
                 dynamic systems = JsonConvert.DeserializeObject<dynamic>(response.Body);
                 var systemsDataList = new List<Sensor>();
                 if (systems != null)

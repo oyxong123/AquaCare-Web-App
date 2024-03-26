@@ -207,18 +207,29 @@ else if(page == "sensor")
 
     protected async override Task OnInitializedAsync()
     {
-        systemList = await ISensorService.GetLatestSystemRecords();
+        systemList = await ISensorService.GetLatestSystemRecordsAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Data refreshes every 5 minutes.
-            var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+            // Data refreshes every 15 minutes in system details page.
+            var timer = new PeriodicTimer(TimeSpan.FromMinutes(15));
             while (await timer.WaitForNextTickAsync())
             {
-                await OnInitializedAsync();
+                if (sensorModel != "")
+                {
+                    OpenSensorData(sensorModel);
+                }
+                await InvokeAsync(() => StateHasChanged());
+            }
+
+            // Data refreshes every 2 second in all systems page.
+            var timerRealtime = new PeriodicTimer(TimeSpan.FromSeconds(2));
+            while (await timerRealtime.WaitForNextTickAsync())
+            {
+                systemList = ISensorService.GetLatestSystemRecords();
                 await InvokeAsync(() => StateHasChanged());
             }
         }
@@ -262,7 +273,7 @@ else if(page == "sensor")
     private async Task ReturnToSystemsPage()
     {
         page = "systems";
-        systemList = await ISensorService.GetLatestSystemRecords();
+        systemList = await ISensorService.GetLatestSystemRecordsAsync();
         await InvokeAsync(() => StateHasChanged());
     }
 
